@@ -1,4 +1,5 @@
 from datetime import UTC, datetime, timedelta
+from enum import Enum
 from typing import Annotated
 
 import bcrypt
@@ -9,7 +10,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from ..models import Users
-from ..util import get_db
+from ..utils import get_db
 
 SECRET_KEY = "4d741b72629a9256bf21e9fcfefec61478995884f12f2f42154cec8408d8abc1"
 ALGORITHM = "HS256"
@@ -58,13 +59,18 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
         )
 
 
+class Role(str, Enum):
+    ADMIN = "admin"
+    USER = "user"
+
+
 class CreateUserRequest(BaseModel):
     username: str
     email: str
     first_name: str
     last_name: str
     password: str
-    role: str
+    role: Role
     phone_number: str
 
 

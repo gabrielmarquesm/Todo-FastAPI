@@ -6,7 +6,6 @@ from .utils import (
     client,
     override_get_current_user,
     override_get_db,
-    test_todo,
     test_user,
 )
 
