@@ -9,11 +9,9 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from ..config import ALGORITHM, SECRET_KEY
 from ..models import Users
 from ..utils import get_db
-
-SECRET_KEY = "4d741b72629a9256bf21e9fcfefec61478995884f12f2f42154cec8408d8abc1"
-ALGORITHM = "HS256"
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 db_dependency = Annotated[Session, Depends(get_db)]

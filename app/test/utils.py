@@ -5,14 +5,13 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from ..config import SQLALCHEMY_TEST_DATABASE_URL
 from ..database import Base
 from ..main import app
 from ..models import Todos, Users
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
-
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
+    SQLALCHEMY_TEST_DATABASE_URL,
     connect_args={"check_same_thread": False},
     poolclass=StaticPool,
 )
