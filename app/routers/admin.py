@@ -7,7 +7,7 @@ from ..models import Todos
 from ..utils import get_db
 from .auth import Role, get_current_user
 
-router = APIRouter(prefix="/admin", tags=["admin"])
+router = APIRouter()
 
 db_dependency = Annotated[Session, Depends(get_db)]
 user_dependency = Annotated[dict, Depends(get_current_user)]

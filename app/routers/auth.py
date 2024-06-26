@@ -9,11 +9,12 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from ..config import ALGORITHM, SECRET_KEY
+from ..config import settings
 from ..models import Users
 from ..utils import get_db
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter()
+
 db_dependency = Annotated[Session, Depends(get_db)]
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
 
@@ -34,12 +35,14 @@ def create_access_token(
     encode = {"sub": username, "id": user_id, "role": role}
     expires = datetime.now(UTC) + expires_delta
     encode.update({"exp": expires})
-    return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+        )
         username: str | None = payload.get("sub")
         user_id: int | None = payload.get("id")
         user_role: str | None = payload.get("role")
