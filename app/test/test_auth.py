@@ -5,6 +5,7 @@ import pytest
 from fastapi import HTTPException, status
 
 from ..config import settings
+from ..error_messages import ErrorMessages
 from ..routers.auth import (
     authenticate_user,
     create_access_token,
@@ -68,4 +69,4 @@ async def test_get_current_user_missing_payload():
         await get_current_user(token=token)
 
     assert exception_info.value.status_code == status.HTTP_401_UNAUTHORIZED
-    assert exception_info.value.detail == "Could not validate user."
+    assert exception_info.value.detail == ErrorMessages.INVALID_USER

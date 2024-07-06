@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Path, status
 from sqlalchemy.orm import Session
 
+from ..error_messages import ErrorMessages
 from ..models import Todos
 from ..utils import get_db
 from .auth import Role, get_current_user
@@ -17,7 +18,8 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 async def read_all(user: user_dependency, db: db_dependency):
     if user is None or user.get("user_role") != Role.ADMIN:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=ErrorMessages.AUTHENTICATION_FAILED,
         )
     return db.query(Todos).all()
 
@@ -28,14 +30,15 @@ async def delete_todo(
 ):
     if user is None or user.get("user_role") != Role.ADMIN:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=ErrorMessages.AUTHENTICATION_FAILED,
         )
 
     todo_model = db.query(Todos).filter(Todos.id == todo_id).first()
 
     if todo_model is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Todo not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail=ErrorMessages.TODO_NOT_FOUND
         )
 
     db.query(Todos).filter(Todos.id == todo_id).delete()

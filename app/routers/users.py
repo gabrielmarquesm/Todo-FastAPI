@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from ..error_messages import ErrorMessages
 from ..models import Users
 from ..utils import get_db
 from .auth import get_current_user
@@ -24,7 +25,8 @@ class UserVerification(BaseModel):
 async def get_user(user: user_dependency, db: db_dependency):
     if user is None:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=ErrorMessages.AUTHENTICATION_FAILED,
         )
 
     return db.query(Users).filter(Users.id == user.get("id")).first()
@@ -36,7 +38,8 @@ async def change_password(
 ):
     if user is None:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=ErrorMessages.AUTHENTICATION_FAILED,
         )
     user_model = db.query(Users).filter(Users.id == user.get("id")).first()
 
@@ -44,7 +47,8 @@ async def change_password(
         user_verification.password.encode(), user_model.hashed_password.encode()
     ):
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Error on password change"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=ErrorMessages.PASSWORD_CHANGE,
         )
 
     password = user_verification.new_password.encode()
@@ -61,7 +65,8 @@ async def change_phone_number(
 ):
     if user is None:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=ErrorMessages.AUTHENTICATION_FAILED,
         )
 
     user_model = db.query(Users).filter(Users.id == user.get("id")).first()

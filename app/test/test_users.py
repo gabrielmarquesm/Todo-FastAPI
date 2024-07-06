@@ -1,5 +1,6 @@
 from fastapi import status
 
+from ..error_messages import ErrorMessages
 from ..routers.users import get_current_user, get_db
 from .utils import app, client, override_get_current_user, override_get_db, test_user
 
@@ -31,7 +32,7 @@ def test_change_password_invalid_current_password(test_user):
         json={"password": "wrong_password", "new_password": "new_password"},
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
-    assert response.json() == {"detail": "Error on password change"}
+    assert response.json() == {"detail": ErrorMessages.PASSWORD_CHANGE}
 
 
 def test_change_phone_number_success(test_user):

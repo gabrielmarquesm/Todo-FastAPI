@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from ..config import settings
+from ..error_messages import ErrorMessages
 from ..models import Users
 from ..utils import get_db
 
@@ -50,13 +51,13 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
         if username is None or user_id is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Could not validate user.",
+                detail=ErrorMessages.INVALID_USER,
             )
         return {"username": username, "id": user_id, "user_role": user_role}
 
     except jwt.InvalidTokenError:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate user."
+            status_code=status.HTTP_401_UNAUTHORIZED, detail=ErrorMessages.INVALID_USER
         )
 
 
@@ -108,7 +109,7 @@ async def login_for_access_token(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate user.",
+            detail=ErrorMessages.INVALID_USER,
         )
 
     token = create_access_token(

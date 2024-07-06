@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from ..error_messages import ErrorMessages
 from ..models import Todos
 from ..utils import get_db
 from .auth import get_current_user
@@ -25,7 +26,8 @@ class TodoRequest(BaseModel):
 async def read_all(user: user_dependency, db: db_dependency):
     if user is None:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=ErrorMessages.AUTHENTICATION_FAILED,
         )
 
     return db.query(Todos).filter(Todos.owner_id == user.get("id")).all()
@@ -37,7 +39,8 @@ async def read_todo(
 ):
     if user is None:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=ErrorMessages.AUTHENTICATION_FAILED,
         )
 
     todo_model = (
@@ -49,7 +52,10 @@ async def read_todo(
     if todo_model is not None:
         return todo_model
 
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Todo not found")
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=ErrorMessages.TODO_NOT_FOUND,
+    )
 
 
 @router.post("/todo", status_code=status.HTTP_201_CREATED)
@@ -58,7 +64,8 @@ async def create_todo(
 ):
     if user is None:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=ErrorMessages.AUTHENTICATION_FAILED,
         )
 
     todo_model = Todos(**todo_request.model_dump(), owner_id=user.get("id"))
@@ -76,7 +83,8 @@ async def update_todo(
 ):
     if user is None:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=ErrorMessages.AUTHENTICATION_FAILED,
         )
 
     todo_model: Todos | None = (
@@ -87,7 +95,8 @@ async def update_todo(
     )
     if todo_model is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Todo not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=ErrorMessages.TODO_NOT_FOUND,
         )
 
     todo_model.title = todo_request.title
@@ -105,7 +114,8 @@ async def delete_todo(
 ):
     if user is None:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=ErrorMessages.AUTHENTICATION_FAILED,
         )
 
     todo_model: Todos | None = (
@@ -116,7 +126,8 @@ async def delete_todo(
     )
     if todo_model is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Todo not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=ErrorMessages.TODO_NOT_FOUND,
         )
 
     db.query(Todos).filter(Todos.id == todo_id).filter(

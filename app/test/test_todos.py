@@ -1,5 +1,6 @@
 from fastapi import status
 
+from ..error_messages import ErrorMessages
 from ..routers.todos import get_current_user, get_db
 from .utils import (
     TestingSessionLocal,
@@ -47,7 +48,7 @@ def test_read_one_authenticated(test_user, test_todo):
 def test_read_one_authenticated_not_found(test_user, test_todo):
     response = client.get("/todos/todo/999")
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {"detail": "Todo not found"}
+    assert response.json() == {"detail": ErrorMessages.TODO_NOT_FOUND}
 
 
 def test_create_todo(test_user, test_todo):
@@ -98,7 +99,7 @@ def test_update_todo_not_found(test_user, test_todo):
     }
     response = client.get("/todos/todo/999")
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {"detail": "Todo not found"}
+    assert response.json() == {"detail": ErrorMessages.TODO_NOT_FOUND}
 
 
 def test_delete_todo(test_user, test_todo):
@@ -112,4 +113,4 @@ def test_delete_todo(test_user, test_todo):
 def test_delete_todo_not_found(test_user, test_todo):
     response = client.delete("/todos/todo/999")
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {"detail": "Todo not found"}
+    assert response.json() == {"detail": ErrorMessages.TODO_NOT_FOUND}

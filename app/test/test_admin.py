@@ -1,5 +1,6 @@
 from fastapi import status
 
+from ..error_messages import ErrorMessages
 from ..routers.admin import get_current_user, get_db
 from .utils import (
     TestingSessionLocal,
@@ -43,4 +44,4 @@ def test_admin_delete_todo(test_user, test_todo):
 def test_admin_delete_todo_not_found(test_user, test_todo):
     response = client.delete("/admin/todo/999")
     assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json() == {"detail": "Todo not found"}
+    assert response.json() == {"detail": ErrorMessages.TODO_NOT_FOUND}
