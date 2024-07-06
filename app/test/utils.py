@@ -1,24 +1,18 @@
 import bcrypt
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import StaticPool
 
 from ..config import settings
 from ..database import Base
 from ..main import app
 from ..models import Todos, Users
 
-engine = create_engine(
-    settings.SQLALCHEMY_TEST_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
+engine = create_engine(settings.TEST_DATASOURCE_URL)
+Base.metadata.create_all(bind=engine)
 
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-Base.metadata.create_all(bind=engine)
 
 
 def override_get_db():
@@ -50,9 +44,6 @@ def test_todo():
     db.add(todo)
     db.commit()
     yield todo
-    with engine.connect() as connection:
-        connection.execute(text("DELETE FROM todos;"))
-        connection.commit()
 
 
 @pytest.fixture
@@ -72,6 +63,3 @@ def test_user():
     db.add(user)
     db.commit()
     yield user
-    with engine.connect() as connection:
-        connection.execute(text("DELETE FROM users;"))
-        connection.commit()

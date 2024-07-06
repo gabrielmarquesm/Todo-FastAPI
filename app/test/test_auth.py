@@ -1,5 +1,4 @@
 from datetime import timedelta
-from email.policy import HTTP
 
 import jwt
 import pytest
@@ -41,8 +40,8 @@ def test_create_access_token():
 
     decoded_token = jwt.decode(
         token,
-        settings.SECRET_KEY,
-        algorithms=[settings.ALGORITHM],
+        settings.JWT_SECRET,
+        algorithms=[settings.JWT_ALGORITHM],
         options={"verify_signature": False},
     )
 
@@ -54,7 +53,7 @@ def test_create_access_token():
 @pytest.mark.asyncio
 async def test_get_current_user_valid_token():
     encode = {"sub": "testuser", "id": 1, "role": "admin"}
-    token = jwt.encode(encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    token = jwt.encode(encode, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
 
     user = await get_current_user(token=token)
     assert user == {"username": "testuser", "id": 1, "user_role": "admin"}
@@ -63,7 +62,7 @@ async def test_get_current_user_valid_token():
 @pytest.mark.asyncio
 async def test_get_current_user_missing_payload():
     encode = {"role": "user"}
-    token = jwt.encode(encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    token = jwt.encode(encode, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
 
     with pytest.raises(HTTPException) as exception_info:
         await get_current_user(token=token)

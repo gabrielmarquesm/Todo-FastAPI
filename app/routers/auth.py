@@ -35,13 +35,13 @@ def create_access_token(
     encode = {"sub": username, "id": user_id, "role": role}
     expires = datetime.now(UTC) + expires_delta
     encode.update({"exp": expires})
-    return jwt.encode(encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return jwt.encode(encode, settings.JWT_SECRET, algorithm=settings.JWT_ALGORITHM)
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
     try:
         payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+            token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM]
         )
         username: str | None = payload.get("sub")
         user_id: int | None = payload.get("id")
@@ -112,6 +112,6 @@ async def login_for_access_token(
         )
 
     token = create_access_token(
-        user.username, user.id, user.role, timedelta(minutes=20)
+        user.username, user.id, user.role, timedelta(minutes=settings.JWT_TTL)
     )
     return {"access_token": token, "token_type": "bearer"}

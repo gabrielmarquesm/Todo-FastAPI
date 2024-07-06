@@ -26,6 +26,7 @@ async def get_user(user: user_dependency, db: db_dependency):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication Failed"
         )
+
     return db.query(Users).filter(Users.id == user.get("id")).first()
 
 

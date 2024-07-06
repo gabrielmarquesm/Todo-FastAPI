@@ -9,13 +9,14 @@ from .utils import (
     override_get_current_user,
     override_get_db,
     test_todo,
+    test_user,
 )
 
 app.dependency_overrides[get_db] = override_get_db
 app.dependency_overrides[get_current_user] = override_get_current_user
 
 
-def test_read_all_authenticated(test_todo):
+def test_read_all_authenticated(test_user, test_todo):
     response = client.get("/todos")
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == [
@@ -30,7 +31,7 @@ def test_read_all_authenticated(test_todo):
     ]
 
 
-def test_read_one_authenticated(test_todo):
+def test_read_one_authenticated(test_user, test_todo):
     response = client.get("/todos/todo/1")
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == {
@@ -43,13 +44,13 @@ def test_read_one_authenticated(test_todo):
     }
 
 
-def test_read_one_authenticated_not_found(test_todo):
+def test_read_one_authenticated_not_found(test_user, test_todo):
     response = client.get("/todos/todo/999")
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {"detail": "Todo not found"}
 
 
-def test_create_todo(test_todo):
+def test_create_todo(test_user, test_todo):
     request_data = {
         "title": "New Todo",
         "description": "New todo description",
@@ -69,7 +70,7 @@ def test_create_todo(test_todo):
     assert model.complete == request_data.get("complete")
 
 
-def test_update_todo(test_todo):
+def test_update_todo(test_user, test_todo):
     request_data = {
         "title": "New Todo Update",
         "description": "New todo description Update",
@@ -88,7 +89,7 @@ def test_update_todo(test_todo):
     assert model.complete == request_data.get("complete")
 
 
-def test_update_todo_not_found(test_todo):
+def test_update_todo_not_found(test_user, test_todo):
     request_data = {
         "title": "New Todo Update",
         "description": "New todo description Update",
@@ -100,7 +101,7 @@ def test_update_todo_not_found(test_todo):
     assert response.json() == {"detail": "Todo not found"}
 
 
-def test_delete_todo(test_todo):
+def test_delete_todo(test_user, test_todo):
     response = client.delete("/todos/todo/1")
     assert response.status_code == status.HTTP_204_NO_CONTENT
     db = TestingSessionLocal()
@@ -108,7 +109,7 @@ def test_delete_todo(test_todo):
     assert model is None
 
 
-def test_delete_todo_not_found(test_todo):
+def test_delete_todo_not_found(test_user, test_todo):
     response = client.delete("/todos/todo/999")
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json() == {"detail": "Todo not found"}
