@@ -1,6 +1,5 @@
 FROM python:3.12
 WORKDIR /code
-COPY ./requirements.txt /code/requirements.txt
-RUN pip install -r /code/requirements.txt
-RUN pip install pytest
-COPY ./app /code/app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY app/ /code/app

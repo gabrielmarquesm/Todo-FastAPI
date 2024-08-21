@@ -41,7 +41,9 @@ async def change_password(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=ErrorMessages.AUTHENTICATION_FAILED,
         )
-    user_model = db.query(Users).filter(Users.id == user.get("id")).first()
+    user_model: Users | None = (
+        db.query(Users).filter(Users.id == user.get("id")).first()
+    )
 
     if not bcrypt.checkpw(
         user_verification.password.encode(), user_model.hashed_password.encode()
@@ -69,7 +71,9 @@ async def change_phone_number(
             detail=ErrorMessages.AUTHENTICATION_FAILED,
         )
 
-    user_model = db.query(Users).filter(Users.id == user.get("id")).first()
+    user_model: Users | None = (
+        db.query(Users).filter(Users.id == user.get("id")).first()
+    )
     user_model.phone_number = phone_number
     db.add(user_model)
     db.commit()
