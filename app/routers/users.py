@@ -23,12 +23,6 @@ class UserVerification(BaseModel):
 
 @router.get("/", status_code=status.HTTP_200_OK)
 async def get_user(user: user_dependency, db: db_dependency):
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=ErrorMessages.AUTHENTICATION_FAILED,
-        )
-
     return db.query(Users).filter(Users.id == user.get("id")).first()
 
 
@@ -36,14 +30,12 @@ async def get_user(user: user_dependency, db: db_dependency):
 async def change_password(
     user: user_dependency, db: db_dependency, user_verification: UserVerification
 ):
-    if user is None:
+    user_model = db.query(Users).filter(Users.id == user.get("id")).first()
+
+    if user_model is None:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=ErrorMessages.AUTHENTICATION_FAILED,
+            status_code=status.HTTP_401_UNAUTHORIZED, detail=ErrorMessages.INVALID_USER
         )
-    user_model: Users | None = (
-        db.query(Users).filter(Users.id == user.get("id")).first()
-    )
 
     if not bcrypt.checkpw(
         user_verification.password.encode(), user_model.hashed_password.encode()
@@ -65,15 +57,11 @@ async def change_password(
 async def change_phone_number(
     user: user_dependency, db: db_dependency, phone_number: str
 ):
-    if user is None:
+    user_model = db.query(Users).filter(Users.id == user.get("id")).first()
+    if user_model is None:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=ErrorMessages.AUTHENTICATION_FAILED,
+            status_code=status.HTTP_401_UNAUTHORIZED, detail=ErrorMessages.INVALID_USER
         )
-
-    user_model: Users | None = (
-        db.query(Users).filter(Users.id == user.get("id")).first()
-    )
     user_model.phone_number = phone_number
     db.add(user_model)
     db.commit()

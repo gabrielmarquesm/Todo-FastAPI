@@ -1,4 +1,4 @@
-from fastapi import status
+from fastapi import HTTPException, status
 
 from ..error_messages import ErrorMessages
 from ..routers.todos import get_current_user, get_db
@@ -63,12 +63,13 @@ def test_create_todo(test_user, test_todo):
     assert response.status_code == status.HTTP_201_CREATED
 
     db = TestingSessionLocal()
-    model = db.query(Todos).filter(Todos.id == 2).first()
+    todo_model = db.query(Todos).filter(Todos.id == 2).first()
 
-    assert model.title == request_data.get("title")
-    assert model.description == request_data.get("description")
-    assert model.priority == request_data.get("priority")
-    assert model.complete == request_data.get("complete")
+    assert todo_model is not None
+    assert todo_model.title == request_data.get("title")
+    assert todo_model.description == request_data.get("description")
+    assert todo_model.priority == request_data.get("priority")
+    assert todo_model.complete == request_data.get("complete")
 
 
 def test_update_todo(test_user, test_todo):
@@ -82,12 +83,13 @@ def test_update_todo(test_user, test_todo):
     response = client.put("/todos/todo/1", json=request_data)
     assert response.status_code == status.HTTP_204_NO_CONTENT
     db = TestingSessionLocal()
-    model = db.query(Todos).filter(Todos.id == 1).first()
+    todo_model = db.query(Todos).filter(Todos.id == 1).first()
 
-    assert model.title == request_data.get("title")
-    assert model.description == request_data.get("description")
-    assert model.priority == request_data.get("priority")
-    assert model.complete == request_data.get("complete")
+    assert todo_model is not None
+    assert todo_model.title == request_data.get("title")
+    assert todo_model.description == request_data.get("description")
+    assert todo_model.priority == request_data.get("priority")
+    assert todo_model.complete == request_data.get("complete")
 
 
 def test_update_todo_not_found(test_user, test_todo):

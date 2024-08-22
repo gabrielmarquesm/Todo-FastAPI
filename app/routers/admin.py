@@ -16,7 +16,7 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 
 @router.get("/todo", status_code=status.HTTP_200_OK)
 async def read_all(user: user_dependency, db: db_dependency):
-    if user is None or user.get("user_role") != Role.ADMIN:
+    if user.get("user_role") != Role.ADMIN:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=ErrorMessages.AUTHENTICATION_FAILED,
@@ -28,7 +28,7 @@ async def read_all(user: user_dependency, db: db_dependency):
 async def delete_todo(
     user: user_dependency, db: db_dependency, todo_id: Annotated[int, Path(gt=0)]
 ):
-    if user is None or user.get("user_role") != Role.ADMIN:
+    if user.get("user_role") != Role.ADMIN:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=ErrorMessages.AUTHENTICATION_FAILED,

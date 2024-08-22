@@ -6,7 +6,7 @@ import bcrypt
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 from sqlalchemy.orm import Session
 
 from ..config import settings
@@ -20,8 +20,34 @@ db_dependency = Annotated[Session, Depends(get_db)]
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 
+class Role(str, Enum):
+    ADMIN = "admin"
+    USER = "user"
+
+
+class CreateUserRequest(BaseModel):
+    username: str
+    email: str
+    first_name: str
+    last_name: str
+    password: str
+    role: Role
+    phone_number: str
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenPayload(BaseModel):
+    sub: str
+    id: int
+    role: str
+
+
 def authenticate_user(username: str, password: str, db: db_dependency):
-    user: Users | None = db.query(Users).filter(Users.username == username).first()
+    user = db.query(Users).filter(Users.username == username).first()
     if not user:
         return False
     if not bcrypt.checkpw(password.encode(), user.hashed_password.encode()):
@@ -44,41 +70,19 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
         payload = jwt.decode(
             token, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM]
         )
-        username: str | None = payload.get("sub")
-        user_id: int | None = payload.get("id")
-        user_role: str | None = payload.get("role")
 
-        if username is None or user_id is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=ErrorMessages.INVALID_USER,
-            )
-        return {"username": username, "id": user_id, "user_role": user_role}
+        token_data = TokenPayload(**payload)
 
-    except jwt.InvalidTokenError:
+    except (jwt.InvalidTokenError, ValidationError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail=ErrorMessages.INVALID_USER
         )
 
-
-class Role(str, Enum):
-    ADMIN = "admin"
-    USER = "user"
-
-
-class CreateUserRequest(BaseModel):
-    username: str
-    email: str
-    first_name: str
-    last_name: str
-    password: str
-    role: Role
-    phone_number: str
-
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
+    return {
+        "username": token_data.sub,
+        "id": token_data.id,
+        "user_role": token_data.role,
+    }
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
