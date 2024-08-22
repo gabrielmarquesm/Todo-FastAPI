@@ -1,13 +1,6 @@
 # Todo-FastAPI
 
-This is a Todo application built with FastAPI, pytest, Alembic, PostgreSQL, and Docker. The application provides RESTful endpoints to manage todos and users associated with them.
-
-## Table of Contents
-- [Todo-FastAPI](#todo-fastapi)
-  - [Table of Contents](#table-of-contents)
-  - [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Running the API](#running-the-api)
+This Todo application, built with FastAPI, SQLAlchemy, pytest, Alembic, PostgreSQL, and Docker, offers an easy way to manage tasks for different users with role-based authentication. It provides RESTful endpoints to create, update, and organize tasks while supporting multiple user roles, ensuring secure and streamlined task management for teams.
 
 ## Getting Started
 
